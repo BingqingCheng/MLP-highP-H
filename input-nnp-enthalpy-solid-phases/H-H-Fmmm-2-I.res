@@ -1,0 +1,22 @@
+TITL H-H-Fmmm-2-I 250.0381 3.073864 -2.38403233E+001 0 0 2 (Fmmm) n - 1
+REM
+REM Run started: Tue, 02 Jul 2019 14:36:48 +0100 in /home/cjp20/work/RUNS/H-III/Collection-250GPa
+REM CASTEP 19.1 from code version c8d46cc1791f+ Fri, 02 Nov 2018 15:03:39 +0000
+REM Functional Perdew Burke Ernzerhof Relativity Koelling-Harmon Dispersion off
+REM Cut-off 500.0000 eV Grid scale 2.0000 Gmax 34.3673 1/A FBSC none
+REM Offset 0.000 0.000 0.000 No. kpts 4368 Spacing 0.03
+REM
+REM H.cell (59d69ee0e7cddc0fb58bfe5f937484e2)
+REM AIRSS Version 0.9.2 xxxx 2019 build 2b12898f19dc+ Mon, 17 Jun 2019 10:04:37 +0100
+REM
+REM
+REM
+REM
+REM H 1|0.6|13|15|17|10(qc=8)
+REM 
+CELL 1.54180    1.53275    1.53275    1.65772  105.92222  105.92239  113.99117
+LATT -1
+SFAC H  
+H      1  0.6373421100000 -0.3626578900000 -0.7253157800000 1.0
+H      1  0.3626578900000 -0.6373421100000 -1.2746842200000 1.0
+END

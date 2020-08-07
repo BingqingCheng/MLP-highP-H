@@ -1,0 +1,7 @@
+&dos
+    prefix='pbe'
+    fildos='pbe.dos'
+    Emin=-25.0, Emax=25.0, DeltaE=0.1
+    ngauss = 0
+    degauss = 0.03    	
+ /

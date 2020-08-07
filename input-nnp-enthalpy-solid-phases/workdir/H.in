@@ -1,0 +1,65 @@
+#  --------------------- Initialisation  ---------------------
+units metal             # distances in A, energies in eV, pressure in Bar, time in ps
+dimension 3
+boundary p p p          # periodic in x, y, z
+atom_style   charge
+
+#  --------------------- set pressure  ---------------------
+variable extpress equal 10000.0*PRESSURE # Convert GPa to bar
+
+#  --------------------- Atom definition  ---------------------
+box tilt large          # relax restictions on box tilt factors
+read_data NAMENOW-P-PRESSURE.conf
+
+neigh_modify every 1 delay 0 check yes # update neigbour every step
+neighbor 2.0 bin                       # neighbour list skin
+
+#  --------------------- Potential definition  ---------------------
+include ./H.pp
+
+thermo           10
+thermo_style     custom step temp pe ke enthalpy vol lx press #pxx pyy pzz pxy pyz pxz
+
+#  --------------------- record traj  ---------------------
+dump mintraj all atom 1 NAMENOW-P-PRESSURE.lammpstrj          # dump the trajectory
+dump_modify mintraj sort id                 # sort atoms by numerical label
+
+#   --------------------- initial Relaxation of the structure   --------------------- 
+# min_style sd
+min_style cg
+min_modify line quadratic
+
+# Multiple minimisations to prevent trapping
+fix minbox all box/relax tri ${extpress} vmax 0.1
+minimize 1.0e-8 1.0e-6 10000 1000000       
+fix minbox all box/relax tri ${extpress} vmax 0.01
+minimize 1.0e-8 1.0e-6 10000 1000000
+fix minbox all box/relax tri ${extpress} vmax 0.01
+minimize 1.0e-10 1.0e-8 10000 100000
+fix minbox all box/relax tri ${extpress} vmax 0.001
+minimize 1.0e-10 1.0e-8 10000 100000
+unfix minbox
+
+#  --------------------- dumping xyz files ---------------------
+dump 1 all custom 1 NAMENOW-P-PRESSURE.lammpstrj id type x y z fx fy fz # dump configuration into a trajectory fil
+dump_modify 1 sort id
+
+#   ---------------------  collect results   --------------------- 
+# Variables defined for printing
+variable h equal enthalpy
+variable e equal etotal
+variable v equal vol
+variable p equal press/10000.0            # convert Bar back to GPa
+variable a equal cella
+variable b equal cellb
+variable c equal cellc
+variable alp equal cellalpha
+variable bet equal cellbeta
+variable gam equal cellgamma
+# Print AIRSS-specific data in $seed.lammps
+print "Lattice parameters:  ${a} ${b} ${c} ${alp} ${bet} ${gam}" file NAMENOW-P-PRESSURE.lammps
+print "Volume: $v" append NAMENOW-P-PRESSURE.lammps
+print "Pressure: $p" append NAMENOW-P-PRESSURE.lammps
+print "Enthalpy: $h" append NAMENOW-P-PRESSURE.lammps
+
+undump 1

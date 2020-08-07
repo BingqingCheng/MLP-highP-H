@@ -1,0 +1,84 @@
+###############################################################################
+# MD simulation for PBE H with NN potential
+###############################################################################
+
+###############################################################################
+# VARIABLES
+###############################################################################
+clear
+variable dt              equal  0.0002                                                   # timestep (ps)
+variable intThermo       equal  1                                                       # screen output interval (timesteps)
+variable numSteps        equal  2000000                                                    # total number of simulation timesteps (timesteps)
+variable runnerCutoff    equal  4.24                                            # largest symmetry function cutoff (Angstrom)
+variable nameStartCfg    string "A-data.h64-metalunits"                				# name of the starting configuration file
+variable runnerDir       string "."	                        # directory containing RuNNer files
+# set initial velocity distribution
+variable initTemp        equal  TEMPERATURE                                                   # initial temperature (K)
+variable velSeed         equal  49RANDOM9                                                # seed for random number generator
+# NVT integrator (Nose-Hoover)
+variable startTemp       equal  TEMPERATURE                                                   # starting temperature for thermostat (K)
+variable stopTemp        equal  TEMPERATURE                                                   # final temperature for thermostat (K)
+variable tDamp           equal  0.02                                                    # thermostat damping factor (ps)
+# set pressure
+variable Press          equal   10000*PRESSURE                                          # units in bar. 1 gpa= 10,000 bar
+variable pDamp          equal   0.2
+# dump thermodynamic properties (temperature, pressure, potential energy, kinetic energy, integrator quantity)
+variable intTD           equal  10                                                      # thermodynamics dump file interval (timesteps)
+variable nameTD          string "traj/td"                                               # thermodynamics file name
+variable varVolume       equal  vol                                                     # variable required to print volume
+variable varKE           equal  ke                                                      # variable required to print kinetic energy
+###############################################################################
+# SETUP
+###############################################################################
+units metal                                                                             # define unit system (metal = Angstrom, eV, ps, g/mol)
+boundary p p p                                                                          # set periodic boundary conditions
+atom_style atomic                                                                       # set atomic style for particles
+read_data ${nameStartCfg}                                                               # read start configuration
+
+replicate 2 2 2
+
+change_box all x scale 1.1 y scale 1.1 z scale 1.1 remap
+
+#pair_style runner dir ${runnerDir} showew no resetew yes maxew 1000000                        # set up pair style runner
+pair_style nnp dir ${runnerDir} showew no showewsum 1000 resetew yes maxew 200000000 cflength 1.8897261328 cfenergy 0.0367493254
+
+pair_coeff * * ${runnerCutoff}                                                          # set up pair style coefficients
+timestep ${dt}                                                                          # set timestep
+
+neighbor       2.0 bin          # neighbor list skin width
+neigh_modify   every 1 delay 0 check yes # frequency to update neighor list
+
+velocity all create ${initTemp} ${velSeed}                                              # create initial velocities
+
+thermo ${intThermo}                                                                     # set screen output
+thermo_style custom step time temp pe etotal press vol lx ly lz
+thermo_modify format 4 %20.15g
+
+fix eq all npt temp ${startTemp} ${startTemp} ${tDamp} iso ${Press} ${Press} ${pDamp}
+
+run 50000
+
+unfix eq
+
+write_restart equal.restart
+
+fix             3 all plumed   plumedfile  plumed.dat     outfile p.log
+###############################################################################
+# SIMULATION
+###############################################################################
+fix 1 all npt temp ${startTemp} ${stopTemp} ${tDamp} iso ${Press} ${Press} ${pDamp}                                # set up integrator
+#fix 1 all nvt temp ${startTemp} ${stopTemp} ${tDamp}
+
+dump            1 all custom 10000 A.lammpstrj id type x y z # dump configuration into a trajectory file
+
+run ${numSteps}
+#fix 1 all ipi driver.01 32346 unix
+#run 10000000
+#
+###############################################################################
+# CLEAN UP
+###############################################################################
+#undump XYZ
+#unfix AVE_TD
+#unfix INT
+###############################################################################

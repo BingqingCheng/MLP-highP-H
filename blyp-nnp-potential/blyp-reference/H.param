@@ -1,0 +1,28 @@
+#task                 : geometryoptimization 
+xc_functional        : BLYP
+spin_polarized       : false 
+fix_occupancy        : false 
+metals_method        : dm 
+mixing_scheme        : pulay 
+max_scf_cycles       : 1000 
+cut_off_energy       : 700 eV
+grid_scale : 2
+fine_grid_scale : 3
+opt_strategy         : speed 
+page_wvfns           : 0 
+num_dump_cycles      : 0 
+backup_interval      : 0 
+geom_method          : LBFGS 
+geom_max_iter        : 20 
+mix_history_length   : 20 
+finite_basis_corr    : 0
+fixed_npw            : true
+write_cell_structure : true
+write_checkpoint     : none
+write_bib            : false
+write_otfg           : false
+#write_cst_esp        : false # Requires Castep 17 and above
+#write_bands          : false # Requires Castep 17 and above
+#write_geom           : false # Requires Castep 17 and above
+#bs_write_eigenvalues : false
+calculate_stress     : true

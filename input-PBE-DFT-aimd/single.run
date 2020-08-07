@@ -1,0 +1,34 @@
+#!/bin/bash -l
+# i-PI on deneb
+# set --ntasks-per-core=1 for 512 tasks, 64 nodes, 8 cores/node, 4 Gb/task 
+# Use less cores per node if you need more memory per MPI task, e.g.: 
+# set --ntasks-per-node=4 for 512 tasks with 8 Gb/task on 128 nodes
+#
+#SBATCH --job-name=sf-1
+#SBATCH --time=02:00:00
+#SBATCH --ntasks=28
+#SBATCH --mem 32000
+
+set +e
+
+module load intel/18.0.2  intel-mkl/2018.2.199 intel-mpi/2018.2.199
+module load quantum-espresso/6.2.0-mpi
+module load python/2.7.14
+
+den=$1
+temp=$2
+port=$3
+
+sed -i "s/TEMPERATURE/${temp}/" input.xml
+sed -i "s/DENSITY/${den}/" input.xml
+sed -i "s/HOST/${HOSTNAME}/" input.xml
+sed -i "s/PORT/${port}/" input.xml
+python   ~/programlist/i-pi-dev/bin/i-pi input.xml &> log.i-pi &
+
+sleep 5
+
+
+srun -n 28 --exclusive --mem=30000 pw.x < qe-h128.in >> qe.log --ipi ${HOSTNAME}:${port}
+
+
+wait
