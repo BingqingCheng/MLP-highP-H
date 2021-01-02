@@ -8,6 +8,8 @@ Input files for running molecule dynamic simulations using the NNPs are also pro
 
 =========================
 
+* ./pbe-training-set/: the training set of the PBE NNP, following the N2P2/RuNNer format (see https://github.com/CompPhysVienna/n2p2). Contains energy, forces, and coordinates of atoms. All in atomic units. Redmer.data are from https://journals.aps.org/prb/abstract/10.1103/PhysRevB.82.195107. The production version of the NNP was not trained on this set, although we did try training on this set and did not notice any significant difference.
+
 * ./pbe-nnp-potential/: the neural network potential (NNP) for high pressure H based on PBE-DFT. Two versions (v1 and v2) are included. v2 is the version used to generate the results reported in the manuscript. v1 is an earlier version, which is almost as accurate! The subdirectory /pbe-reference/ contains the CASTEP input files for the PBE DFT reference calculations.
 
 * ./blyp-nnp-potential/: the neural network potential for high pressure H based on BLYP-DFT. The subdirectory /blyp-reference/ contains the CASTEP input files for the BLYP DFT reference calculations.
